@@ -1,0 +1,4 @@
+,
+            {"name": "Wilayah F", "file_gambar": "144309.png", "luas": "9 Ha", "metadata": [{"title": "Pembersihan", "subtitle": "11 Mei 2024 14:15 WIB", "icon": "⚠️"}]},
+            {"name": "Wilayah G", "file_gambar": "144805.png", "luas": "11 Ha", "metadata": [{"title": "Pengamatan", "subtitle": "12 Mei 2024 15:00 WIB", "icon": "🛠️"}]},
+            {"name": "Wilayah H", "file_gambar": "150058.png", "luas": "9 Ha", "metadata": [{"title": "Pembersihan", "subtitle": "11 Mei 2024 14:15 WIB", "icon": "⚠️"}]}
