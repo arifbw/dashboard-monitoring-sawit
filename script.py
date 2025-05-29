@@ -1,3 +1,5 @@
+import os
+import re
 import streamlit as st
 from PIL import Image, ImageDraw
 import random
@@ -119,11 +121,9 @@ dummy_sites = {
             ]
         ],
         "areas": [
-            {"name": "Sektor A", "luas": "10 Ha", "metadata": [{"title": "Panen", "subtitle": "12 Mei 2024 10:00 WIB", "icon": "⚠️"}]},
-            {"name": "Sektor B", "luas": "12 Ha", "metadata": [{"title": "Penyemprotan", "subtitle": "13 Mei 2024 09:00 WIB", "icon": "🛠️"}]},
-            {"name": "Sektor C", "luas": "15 Ha", "metadata": [{"title": "Pemupukan", "subtitle": "14 Mei 2024 14:00 WIB", "icon": "✅"}]},
-            {"name": "Sektor D", "luas": "8 Ha", "metadata": [{"title": "Penyulaman", "subtitle": "15 Mei 2024 08:30 WIB", "icon": "⚠️"}]},
-            {"name": "Sektor E", "luas": "11 Ha", "metadata": [{"title": "Pengamatan", "subtitle": "16 Mei 2024 11:45 WIB", "icon": "🛠️"}]}
+            {"name": "Sektor A", "file_gambar": "no_img.jpg", "luas": "10 Ha", "metadata": [{"title": "Panen", "subtitle": "12 Mei 2024 10:00 WIB", "icon": "⚠️"}]},
+            {"name": "Sektor B", "file_gambar": "no_img.jpg", "luas": "12 Ha", "metadata": [{"title": "Penyemprotan", "subtitle": "13 Mei 2024 09:00 WIB", "icon": "🛠️"}]},
+            {"name": "Sektor C", "file_gambar": "no_img.jpg", "luas": "15 Ha", "metadata": [{"title": "Pemupukan", "subtitle": "14 Mei 2024 14:00 WIB", "icon": "✅"}]}
         ]
     },
     "Site 2": {
@@ -238,8 +238,12 @@ with col1:
     nama_folder = selected_site.lower().replace(" ", "")
 
     names_area = [item["name"] for item in site_data["areas"]]
-    picts_area = [f'site5/{item["file_gambar"]}' for item in site_data["areas"]]
-
+    # picts_area = [f'{nama_folder    }/{item["file_gambar"]}' for item in site_data["areas"]]
+    picts_area = [
+        f'{nama_folder}/{item["file_gambar"]}'
+        for item in site_data["areas"]
+        if "file_gambar" in item
+    ]
     # st.write(picts_area)
 
     st.text_input("Cari Area :", placeholder="Cari Area disini ...")
@@ -252,7 +256,12 @@ with col1:
     # resized_image = image.resize((50, 50))
     
     # st_image_button("Title", "images.jpeg", "150px", "outlined")
-    img_selected = image_select("PIlih Area :", picts_area, names_area, use_container_width=False)
+
+    if len(picts_area) > 0:
+        img_selected = image_select("PIlih Area :", picts_area, names_area, use_container_width=False)
+    else:
+        st.write("### There is no Area yet, in this site.")
+        img_selected = "no_img.png"
 
 def image_to_base64(img):
     from io import BytesIO
@@ -269,12 +278,16 @@ def render_html_bounding_box(image_path):
     img_base64 = image_to_base64(image)
 
     # Load boxes from JSON
-    json_path = image_path.replace(".png", ".json")
-    with open(json_path, "r") as f:
-        # boxes = json.load(f)
-        box_data = json.load(f)
-        if isinstance(box_data, dict):
-            box_data = [box_data]
+    json_path = re.sub(r'\.(png|jpe?g)$', '.json', image_path, flags=re.IGNORECASE)
+    
+    if os.path.exists(json_path):
+        with open(json_path, "r") as f:
+            box_data = json.load(f)
+            if isinstance(box_data, dict):
+                box_data = [box_data]
+    else:
+        st.image(image_path)
+        return
 
     # Generate bounding boxes HTML
     box_divs = ""
@@ -491,7 +504,7 @@ with col2:
 
     # Column 1: Kondisi Lima Penyakit
     with col1:
-        st.markdown("<div class='section-header'>Kondisi Lima Penyakit “Area A” Minggu Ini/ Periode Ini</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='section-header'>Kondisi Lima Penyakit “{selected_site}” Minggu Ini/ Periode Ini</div>", unsafe_allow_html=True)
 
         st.markdown("""
             <div class="row">⚠️ <span>Hama Fungi<br><small>12 Mei 2024 10:00 WIB</small></span></div>
